@@ -107,7 +107,17 @@ function start( next, isHeadless, options ) {
     seleniumServerProcess.stderr.on('data', function(data) {
         var errMsg;
         data = data.trim();
-        if ( isHeadless) {
+
+        var hasUnexpectedOutput = function () {
+            return data &&
+                data.indexOf('org.openqa.grid.selenium.GridLauncher main') === -1 &&
+                data.indexOf('Setting system property') === -1 &&
+                data.indexOf('INFO') === -1 &&
+                data.indexOf('WARNING') === -1 &&
+                data.indexOf('Picked up') === -1 && !started;
+        };
+
+        if (isHeadless) {
             // check for grid started, which is outputted to standard error
             if ( data.indexOf( 'Started SocketConnector' ) > -1) {
 //                console.log ('selenium hub ready');
@@ -117,18 +127,13 @@ function start( next, isHeadless, options ) {
                  errMsg = 'FATAL ERROR starting selenium: ' + data + ' maybe try killall -9 java';
                 throw errMsg;                
             }
-        } else if ( data && 
-             // throw error if something unexpected happens
-             data.indexOf('org.openqa.grid.selenium.GridLauncher main') === -1 &&
-             data.indexOf('Setting system property') === -1 &&
-             data.indexOf('INFO') === -1 &&
-             data.indexOf('WARNING') === -1 &&
-             !started
-              ) {
+        } else if (hasUnexpectedOutput()) {
             errMsg = 'FATAL ERROR starting selenium: ' + data;
+            console.log(data);
             throw errMsg;
         }
     });
+
     seleniumServerProcess.stdout.setEncoding('utf8');
     seleniumServerProcess.stdout.on('data', function( msg ) {
         // monitor process output for ready message
