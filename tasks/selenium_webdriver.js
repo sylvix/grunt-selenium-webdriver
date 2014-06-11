@@ -18,19 +18,9 @@ var spawn = require('child_process').spawn,
     started = false,
     os = require('os'),
     selOptions = [ '-jar' ],
-    phantomLoc = __dirname,
     seleniumServerProcess = null,
     phantomProcess = null,
     fs = require('fs');
-
-// installed as module or locally?
-if (fs.existsSync('jar')) {
-    selOptions.push ( 'jar/selenium-server-standalone-2.39.0.jar' );
-    phantomLoc += "/../node_modules/phantomjs/bin";
-} else {
-    selOptions.push ( 'node_modules/grunt-selenium-webdriver/jar/selenium-server-standalone-2.39.0.jar' );    
-    phantomLoc += "/../../phantomjs/bin";
-}
 
 /*
  * starts phantom, called after grid has been established
@@ -38,7 +28,7 @@ if (fs.existsSync('jar')) {
  */
 function startPhantom ( next, options ) {
 
-    phantomProcess = spawn( phantomLoc +'/phantomjs' , [ '--webdriver', '8080', '--webdriver-selenium-grid-hub=http://' + options.host+':' + options.port ]);
+    phantomProcess = spawn( options.phantomjs_location + '/phantomjs' , [ '--webdriver', '8080', '--webdriver-selenium-grid-hub=http://' + options.host+':' + options.port ]);
 
     phantomProcess.stderr.setEncoding('utf8');
     phantomProcess.stderr.on('data', function(data) {
@@ -68,11 +58,13 @@ function startPhantom ( next, options ) {
  */
 function start( next, isHeadless, options ) {
 
-    if ( started) { 
+    selOptions.push(options.selenium_jar);
+
+    if (started) {
         return next(console.log('already started')); 
     }
     
-    if ( isHeadless ) {    
+    if (isHeadless) {
         selOptions.push ( '-role');
         selOptions.push ( 'hub');
     }
@@ -204,7 +196,8 @@ module.exports= function ( grunt) {
           timeout: 30,
           host: '127.0.0.1',
           port: 4444,
-          maxSession: 5
+          maxSession: 5,
+          selenium_jar: 'node_modules/grunt-selenium-webdriver/jar/selenium-server-standalone-2.41.0.jar'
         });
         var done = this.async();
         return start ( done , false, options );
@@ -214,7 +207,8 @@ module.exports= function ( grunt) {
           timeout: 30,
           host: '127.0.0.1',
           port: 4444,
-          maxSession: 5
+          maxSession: 5,
+          phantomjs_location: '/../../phantomjs/bin'
         });
         var done = this.async();
         return start ( done , true, options );

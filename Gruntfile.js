@@ -32,10 +32,17 @@ module.exports = function(grunt) {
     },
 
     selenium_start: {
-        options: { port: 4445 }
+        options: {
+            selenium_jar: 'jar/selenium-server-standalone-2.41.0.jar',
+            port: 4445
+        }
     },
     selenium_phantom_hub: {
-        options: { port: 4445 }
+        options: {
+            selenium_jar: 'jar/selenium-server-standalone-2.41.0.jar',
+            phantomjs_location: 'node_modules/phantomjs/bin',
+            port: 4445
+        }
     },
     selenium_stop: {
         options: { }
