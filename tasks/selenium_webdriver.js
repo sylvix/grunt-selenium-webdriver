@@ -106,7 +106,7 @@ function start( next, isHeadless, options ) {
                 data.indexOf('Setting system property') === -1 &&
                 data.indexOf('INFO') === -1 &&
                 data.indexOf('WARNING') === -1 &&
-                data.indexOf('Picked up') === -1 && !started;
+                data.indexOf('Picked up') === -1;
         };
 
         if (isHeadless) {
@@ -119,9 +119,8 @@ function start( next, isHeadless, options ) {
                  errMsg = 'FATAL ERROR starting selenium: ' + data + ' maybe try killall -9 java';
                 throw errMsg;                
             }
-        } else if (hasUnexpectedOutput()) {
+        } else if (!started && hasUnexpectedOutput()) {
             errMsg = 'FATAL ERROR starting selenium: ' + data;
-            console.log(data);
             throw errMsg;
         }
     });
